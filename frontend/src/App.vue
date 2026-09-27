@@ -12,6 +12,7 @@ const err = ref('')
 const loginForm = ref({ username: 'calibrator', password: 'calib123456' })
 
 const isHome = computed(() => route.path === '/')
+const isRange = computed(() => route.path === '/range')
 const isDetail = computed(() => route.path.startsWith('/jobs/'))
 
 async function login() {
@@ -51,6 +52,8 @@ function logout() {
       <div class="brand">光谱波长校准台</div>
       <nav class="nav">
         <router-link to="/" :class="{ active: isHome }">校准总览</router-link>
+        <span class="nav-sep">|</span>
+        <router-link to="/range" :class="{ active: isRange }">量程台</router-link>
         <span class="nav-sep">|</span>
         <span
           class="nav-hint"

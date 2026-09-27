@@ -6,14 +6,17 @@ import { api } from '../api.js'
 const router = useRouter()
 const role = ref(localStorage.getItem('role') || '')
 const jobs = ref([])
+const range = ref(null)
 const err = ref('')
-const form = ref({ lamp: '', nominal_nm: 0.15, measured_nm: 0.15 })
+const form = ref({ lamp: '', nominal_nm: 587, measured_nm: 587 })
 let timer
 
 async function refresh() {
   if (!localStorage.getItem('tok')) return
   try {
-    jobs.value = await api('/api/jobs')
+    const [j, r] = await Promise.all([api('/api/jobs'), api('/api/range')])
+    jobs.value = j
+    range.value = r
     err.value = ''
   } catch (e) {
     err.value = String(e.message || e)
@@ -51,6 +54,9 @@ onUnmounted(() => clearInterval(timer))
       <label>标称 nm <input type="number" step="0.01" v-model.number="form.nominal_nm" /></label>
       <label>实测 nm <input type="number" step="0.01" v-model.number="form.measured_nm" /></label>
       <button @click="submit">入队</button>
+      <p v-if="range" class="range-hint">
+        标称按量程闭区间 [{{ range.min_nm }}, {{ range.max_nm }}] nm 卡量，区间外拒收（量程台可设）。
+      </p>
     </section>
     <table border="1" cellpadding="6" style="border-collapse:collapse; width:100%;">
       <thead>
@@ -77,3 +83,10 @@ onUnmounted(() => clearInterval(timer))
     </table>
   </div>
 </template>
+
+<style scoped>
+.range-hint {
+  color: #666;
+  font-size: 13px;
+}
+</style>
